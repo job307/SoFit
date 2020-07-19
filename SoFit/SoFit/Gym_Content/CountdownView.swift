@@ -33,13 +33,16 @@ struct CountdownView: View {
     
     var body: some View {
         VStack {
+            // Show Countdown
             ZStack {
+                // Circle in background
                 Circle()
                     .trim(from: 0, to: 1)
                     .stroke(Color.black.opacity(0.09), style: StrokeStyle(lineWidth: 20, lineCap: .round))
                     .frame(width: 160, height: 160)
                     .padding(.top, 25)
                 
+                // Circle filling up over time
                 Circle()
                     .trim(from: 0, to: self.fillCircle)
                     .stroke(Color("lightFont"), style: StrokeStyle(lineWidth: 20, lineCap: .round))
@@ -47,13 +50,16 @@ struct CountdownView: View {
                     .rotationEffect(.init(degrees: -90))
                     .padding(.top, 25)
                 
+                // Countdown as number
                 Text("\(self.count)")
                     .font(.system(size: 55))
                     .fontWeight(.bold)
                     .padding(.top, 25)
                 
             }.onReceive(self.clockTimer) { _ in
+                // Ignore if pause = true
                 if !self.pause {
+                    // Fill Circle
                     if self.count != 0 {
                         self.count -= 1
                         withAnimation(.default) {
@@ -65,10 +71,12 @@ struct CountdownView: View {
                         withAnimation(.default) {
                             self.fillCircle = 0
                         }
+                        // Next CountdownView
                         self.selected =  self.nextOne
                     }
                 }
             }
+            // Changes after 5 sec to Workout name
             Text(self.maxCount - self.count <= 5 ? "Get Ready" : self.workout.name)
                 .font(.system(size: self.maxCount - self.count <= 5 ? 40 : 30))
                 .fontWeight(.heavy)
@@ -76,6 +84,7 @@ struct CountdownView: View {
                 .foregroundColor(Color.black)
             
             Spacer()
+            // Animates Image
             Image(self.workout.clips[activeImageIndex])
                 .onReceive(imageSwitchTimer, perform: { _ in
                     self.activeImageIndex = (self.activeImageIndex + 1) % self.workout.clips.count
@@ -83,18 +92,21 @@ struct CountdownView: View {
                 
             Spacer()
             HStack {
+                // Back to Gym Button
                 Button(action: {
                     self.selected = "Gym"
                 }) {
                     BottomButton(systemname: "xmark.circle")
                 }
                 
+                // Pause / Play Button
                 Button(action: {
                     self.pause.toggle()
                 }) {
                     BottomButton(systemname: self.pause ? "play.circle" : "pause.circle")
                 }
                 
+                // Skip Button
                 Button(action: {
                     self.selected =  self.nextOne
                 }) {

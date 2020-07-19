@@ -22,13 +22,14 @@ struct GymView: View {
                         .fontWeight(.heavy)
                         .padding(.top, 24)
                     
+                    // Show the five Workouts in custom WorkoutRowView
                     VStack(spacing: -100) {
                         ForEach((0..<self.practice.count), id: \.self) { i in
                             WorkoutRowView(practice: self.$practice, workout: self.practice[i], finished: false)
                         }
                     }.offset(y: -55)
-                }
-                .navigationBarTitle(Text("Gym").foregroundColor(Color("font")), displayMode: .inline)
+                // NavigationView parameters like Back Button
+                }.navigationBarTitle(Text("Gym").foregroundColor(Color("font")), displayMode: .inline)
                 .navigationBarItems(leading: Button(action: {self.selected = "Home"}) {
                     Image(systemName: "arrowshape.turn.up.left").resizable()
                         .frame(width: 25, height: 25, alignment: .leading)
@@ -37,6 +38,7 @@ struct GymView: View {
             }
             
             Button(action: {
+                // Start Practice with first Workout
                 self.selected = "Countdown1"
             }) {
                 BottomButton(systemname: "play.circle")
@@ -57,6 +59,8 @@ struct BottomButton: View {
     
     var body: some View {
         ZStack {
+            
+            // Special Button Form. Used during WorkoutView and CountdownView aswell
             RoundedRectangle(cornerRadius: 35, style: .continuous)
                 .frame(width: 100, height: 60)
                 .foregroundColor(Color(UIColor.systemGray6))

@@ -26,6 +26,7 @@ struct FinishedView: View {
     
     var body: some View {
         ZStack {
+            // Show Level Up Dance if User leveled up
             if levelup {
                 VStack {
                     Text("Level Up")
@@ -42,6 +43,7 @@ struct FinishedView: View {
                             self.levelup = false
                         })
                 }
+            // Show Completed Practice with 
             } else {
                 NavigationView {
                     VStack {

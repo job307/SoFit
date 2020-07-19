@@ -40,13 +40,16 @@ struct WorkoutView: View {
     
     var body: some View {
         VStack {
+            // Show Countdown
             ZStack {
+                // Empty Circle in Background
                 Circle()
                     .trim(from: 0, to: 1)
                     .stroke(Color.black.opacity(0.09), style: StrokeStyle(lineWidth: 20, lineCap: .round))
                     .frame(width: 160, height: 160)
                     .padding(.top, 25)
                 
+                // Circle filling over time
                 Circle()
                     .trim(from: 0, to: self.fillCircle)
                     .stroke(Color("font"), style: StrokeStyle(lineWidth: 20, lineCap: .round))
@@ -54,13 +57,17 @@ struct WorkoutView: View {
                     .rotationEffect(.init(degrees: -90))
                     .padding(.top, 25)
                 
+                // Shown Countdown as a Number
                 Text("\(self.count)")
                     .font(.system(size: 55))
                     .fontWeight(.bold)
                     .padding(.top, 25)
                 
             }.onReceive(self.clockTimer) { _ in
+                // If Pause selected ignore this
                 if !self.pause {
+                    
+                    // Fill Circle per Secend
                     if self.count != 0 {
                         self.count -= 1
                         withAnimation(.default) {
@@ -96,12 +103,16 @@ struct WorkoutView: View {
                             userFitness = todaysWorkouts.count == 0 ? self.practices[self.practices.count - 1].newScore : self.practices[self.practices.count - 1].userFitness
                         }
                         
+                        // Extracted Values needed to fill Practice Obj to save it in DB
                         let avgPrc = Prc / (Double(todaysWorkouts.count) == 0 ? 1 : Double(todaysWorkouts.count))
                         let newScore = self.fitnesslvl.percentage + avgPrc * self.fitnesslvl.progress
                         let newFitid = Int16(self.returnFitID(score: Int(newScore)))
                         
-                        if self.practices[self.practices.count - 1].newFitId < newFitid {
-                            self.lvlUp = true
+                        // If FitId changes, play dance moves on FinishedView to celebrate Level Up
+                        if self.practices.count != 0{
+                            if self.practices[self.practices.count - 1].newFitId < newFitid {
+                                self.lvlUp = true
+                            }
                         }
                         
                         if newFitid != self.level[0].level {
@@ -111,6 +122,7 @@ struct WorkoutView: View {
                             try? self.moc.save()
                         }
                         
+                        // Fill Practice Obj for DB
                         let currentWorkout = TBL_Practice(context: self.moc)
                         currentWorkout.actDur = self.workout.repetition * self.workout.clipDuration * Double(self.workout.clips.count)
                         currentWorkout.actLvl = self.workout.repetition / mdWorkout.repetition
@@ -131,6 +143,8 @@ struct WorkoutView: View {
                     }
                 }
             }
+            
+            // Text changeing after 5 sec to Workout name
             Text(self.maxCount - self.count <= 5 ? "Go" : self.workout.name)
                 .font(.system(size: self.maxCount - self.count <= 5 ? 40 : 30))
                 .fontWeight(.heavy)
@@ -138,6 +152,8 @@ struct WorkoutView: View {
                 .foregroundColor(Color.black)
             
             Spacer()
+            
+            // Changeing Images after several sec to "animate" Workout
             Image(self.workout.clips[activeImageIndex])
                 .onReceive(imageSwitchTimer, perform: { _ in
                     self.activeImageIndex = (self.activeImageIndex + 1) % self.workout.clips.count
@@ -145,18 +161,22 @@ struct WorkoutView: View {
                 
             Spacer()
             HStack {
+                
+                // Back to Gym Button
                 Button(action: {
                     self.selected = "Gym"
                 }) {
                     BottomButton(systemname: "xmark.circle")
                 }
                 
+                // Pause / Play Button
                 Button(action: {
                     self.pause.toggle()
                 }) {
                     BottomButton(systemname: self.pause ? "play.circle" : "pause.circle")
                 }
                 
+                // Skip Button
                 Button(action: {
                     self.selected =  self.nextOne
                 }) {

@@ -30,8 +30,8 @@ struct StatsView: View {
     
     @State var lineData: [[Double]] = [[1,2,3,4], [1,2,3,4], [1,2,3,4]]
     @State var barNames: [[String]] = [["1", "2", "3", "4"]]
-    @State var motTextn: [String] = [""]
-    @State var motText1: [String] = [""]
+    @State var motTextn: [String] = ["", "", ""]
+    @State var motText1: [String] = ["", "", ""]
     
     // Split Workouts indexes in smaller time intervalls to show 4 Bars per Week / Month / 2Weeks
     @State var weeklyBarData0: [[Int]] = []
@@ -80,7 +80,7 @@ struct StatsView: View {
         NavigationView {
             ScrollView(showsIndicators: false) {
                 VStack {
-                    
+                    // Line chart
                     LineView(data: self.lineData[pickerSelected], legend: "Fitness Progress", style: myChartSytle)
                         .padding(.leading, 10)
                         .padding(.trailing, 10)
@@ -88,6 +88,8 @@ struct StatsView: View {
                     
                     VStack(spacing: 20) {
                         VStack(alignment: .leading) {
+                            
+                            // Motivational Slogans
                             Text("Achievements").foregroundColor(Color("lightFont")).font(.system(size: 16)).padding(.leading, 5)
                             SeperaterView(color: Color.gray.opacity(0.3), label: Text("Your level is \(fitnessClassData[Int(self.level[0].level)].name.rawValue)"))
                             SeperaterView(color: Color.gray.opacity(0.3), label: Text("Fitness: \(self.motTextn[self.pickerSelected])"))
@@ -100,6 +102,7 @@ struct StatsView: View {
                             Spacer()
                         }
                         
+                        // Bar Chart; If no Value at all fill with sample Data
                         HStack(spacing: 18) {
                             BarView(value1: self.barData[pickerSelected][0], value2: self.barData[pickerSelected][1], value3: self.barData[pickerSelected][2], value4: self.barData[pickerSelected][3], value5: self.barData[pickerSelected][4], name: self.barNames[pickerSelected][0], height: 200)
                             
@@ -110,6 +113,7 @@ struct StatsView: View {
                             BarView(value1: self.barData[pickerSelected][15], value2: self.barData[pickerSelected][16], value3: self.barData[pickerSelected][17], value4: self.barData[pickerSelected][18], value5: self.barData[pickerSelected][19], name: self.barNames[pickerSelected][3], height: 200)
                         }.animation(.default)
                         
+                        // What Color means what
                         HStack(spacing: 20) {
                             Text("Chest").foregroundColor(Color("Cool Black"))
                             Text("Back").foregroundColor(Color("Medium Persian Blue"))
@@ -119,7 +123,7 @@ struct StatsView: View {
                         }
                     }
                     
-                    
+                    // Set time Intervall to Weekly/ Bimonthly/ Monthly
                     Picker(selection: $pickerSelected, label: Text("")) {
                         Text("1W").tag(0)
                         Text("2W").tag(1)
@@ -140,25 +144,29 @@ struct StatsView: View {
             var biMonthlyLineData: [Double] = []
             var weeklyLineData: [Double] = []
             
+            // Get names for the Bars from Bar Chart
             self.barNames.remove(at: 0)
+            // Weekly Bar names
             self.barNames.append([self.formatter.string(from: self.tn!) + " - " + self.formatter.string(from: self.wkt3!),
                                   self.formatter.string(from: self.wkt3!) + " - " + self.formatter.string(from: self.wkt2!),
                                   self.formatter.string(from: self.wkt2!) + " - " + self.formatter.string(from: self.wkt1!),
                                   self.formatter.string(from: self.wkt1!) + " - " + self.formatter.string(from: self.wkt0!)])
-            
+            // Bimonthly Bar names
             self.barNames.append([self.formatter.string(from: self.tn!) + " - " + self.formatter.string(from: self.bmt3!),
                                   self.formatter.string(from: self.bmt3!) + " - " + self.formatter.string(from: self.bmt2!),
                                   self.formatter.string(from: self.bmt2!) + " - " + self.formatter.string(from: self.bmt1!),
                                   self.formatter.string(from: self.bmt1!) + " - " + self.formatter.string(from: self.bmt0!)])
-            
+            // Monthly Bar names
             self.barNames.append([self.formatter.string(from: self.tn!) + " - " + self.formatter.string(from: self.mot3!),
                                   self.formatter.string(from: self.mot3!) + " - " + self.formatter.string(from: self.mot2!),
                                   self.formatter.string(from: self.mot2!) + " - " + self.formatter.string(from: self.mot1!),
                                   self.formatter.string(from: self.mot1!) + " - " + self.formatter.string(from: self.mot0!)])
             
-            if self.practices.count > 0 {
+            if self.practices.count > 5 {
                 for i in 0..<self.practices.count {
+                    // (DB) History Data in given time Intervall?
                     if self.practices[i].timestamp! > self.mot0! && self.practices[i].timestamp! <= self.tn! {
+                        // Set Data for Line Chart
                         monthlyLineData.append(self.practices[i].newScore)
                         
                         // Get monthly Data in big Intervalls to feed the Bar Chart
@@ -176,7 +184,9 @@ struct StatsView: View {
                         }
                     }
                     
+                    // History in Time Intervall?
                     if self.practices[i].timestamp! > self.bmt0! && self.practices[i].timestamp! <= self.tn! {
+                        // Fill Line Chart
                         biMonthlyLineData.append(self.practices[i].newScore)
                         
                         // Get bimonthly Data in Intervalls to feed the Bar Chart
@@ -195,6 +205,7 @@ struct StatsView: View {
                     }
                     
                     if self.practices[i].timestamp! > self.wkt0! && self.practices[i].timestamp! <= self.tn! {
+                        // Fill Line Chart
                         weeklyLineData.append(self.practices[i].newScore)
                         
                         // Get weekly Data in small Intervalls to feed the Bar Chart
@@ -232,11 +243,17 @@ struct StatsView: View {
                 let countBiMonthly: Double = Double(biMonthlyLineData.count) / Double(60)
                 let countMonthly: Double = Double(monthlyLineData.count) / Double(120)
                 
+                // Reset Data and fill with new
+                self.motTextn.remove(at: 2)
+                self.motTextn.remove(at: 1)
                 self.motTextn.remove(at: 0)
                 self.getDevFitMsg(rate: devFitIncrease)
                 self.getDevFitMsg(rate: devFitBiMonthly)
                 self.getDevFitMsg(rate: devFitMonthly)
                 
+                // Reset Data and fill with new
+                self.motText1.remove(at: 2)
+                self.motText1.remove(at: 1)
                 self.motText1.remove(at: 0)
                 self.getDevCommMsg(countWorkouts: countWorkouts)
                 self.getDevCommMsg(countWorkouts: countBiMonthly)
@@ -248,6 +265,7 @@ struct StatsView: View {
         }
     }
     
+    // Check which Text to show
     func getDevFitMsg(rate: Double) {
         if rate < 0.63 {
             self.motTextn.append(self.devFit[0])
@@ -270,6 +288,7 @@ struct StatsView: View {
         }
     }
     
+    // Check which text to show
     func getDevCommMsg(countWorkouts: Double) {
         if countWorkouts < 0.33 {
             self.motText1.append(self.devComm[0])

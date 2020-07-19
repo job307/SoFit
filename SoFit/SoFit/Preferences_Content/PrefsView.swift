@@ -20,10 +20,14 @@ struct PrefsView: View {
     @State private var trigger: UNNotificationTrigger? = nil
     @State private var fitnessLevel = 0
     @State private var count = 30
+    @State private var showingAlert1 = false
+    @State private var showingAlert2 = false
     
     @Binding var selected: String
     @Binding var prefsForList: [[Double]]
     
+    private let recurring: [String] = ["never", "daily", "weekly"]
+    private let formatter = DateFormatter()
     private let minDate = Calendar.current.date(byAdding: .day, value: 0, to: Date())
     private let maxDate = Calendar.current.date(byAdding: .day, value: 30, to: Date())
     
@@ -31,6 +35,7 @@ struct PrefsView: View {
         self._selected = selected
         self._count = State(initialValue: Int(countdown))
         self._prefsForList = prefs
+        self.formatter.dateFormat = "HH:mm, dd-MMM-yyyy"
     }
     
     var body: some View {
@@ -86,22 +91,28 @@ struct PrefsView: View {
                         
                         // Add notification request
                         UNUserNotificationCenter.current().add(request)
+                        self.showingAlert1 = true
                     }) {
                         HStack {
                             Spacer()
                             Text("Save Reminder")
                             Spacer()
                         }
+                    }.alert(isPresented: $showingAlert1) {
+                        Alert(title: Text("Successfully Saved"), message: Text("Reminder is set to \(self.formatter.string(from: reminderDate)) and will repeat \(recurring[reminderIntervall])"), dismissButton: .default(Text("OK")))
                     }
                     
                     Button(action: {
                         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+                        self.showingAlert2 = true
                     }) {
                         HStack {
                             Spacer()
                             Text("Delete All Reminder")
                             Spacer()
                         }
+                    }.alert(isPresented: $showingAlert2) {
+                        Alert(title: Text("Successfully Deleted"), message: Text("All Notifications are deleted"), dismissButton: .default(Text("OK")))
                     }
                 }
                 
@@ -146,7 +157,14 @@ struct PrefsView: View {
                     }
                     
                     Button(action: {
-                        //Reset Database values
+                        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+                        
+                        //Reset Preferences
+                        for i in 0..<self.prefs.count {
+                            self.moc.delete(self.prefs[self.prefs.count - 1 - i])
+                        }
+                        
+                        // Refill Preferences
                         for i in 1...workoutData.count {
                             let initialiseDB = TBL_WO_Pref(context: self.moc)
                             initialiseDB.pref = 1
@@ -154,10 +172,25 @@ struct PrefsView: View {
                             
                             try? self.moc.save()
                         }
+                        
+                        // Delete history
                         for i in 0..<self.practices.count {
-                            self.moc.delete(self.practices[i])
+                            self.moc.delete(self.practices[self.practices.count - 1 - i])
                         }
-                        self.moc.delete(self.countdown[0])
+                        
+                        // Reset Fitness Level
+                        for i in 0..<self.level.count {
+                            self.moc.delete(self.level[self.level.count - 1 - i])
+                        }
+                        let lvl = FitnessLevel(context: self.moc)
+                        lvl.level = Int16(0)
+                        
+                        try? self.moc.save()
+                        
+                        // Reset Countdown
+                        for i in 0..<self.countdown.count {
+                            self.moc.delete(self.countdown[self.countdown.count - 1 - i])
+                        }
                         let cd = Countdown(context: self.moc)
                         cd.countdown = Int16(10)
                         try? self.moc.save()
