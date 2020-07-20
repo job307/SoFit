@@ -1,5 +1,6 @@
 # SoFit
 TINF18B5 Software Engineering Projekt
+### Youtube Trailer: https://youtu.be/lQwGirgXAzo
 
 SoFit ist eine Fitness-Assistent-App für iOS und hat die drei Hauptfunktionen Zielsetzung, Training und Monitoring. 
 Alle weiteren Funktionen lassen sich diesen Hauptbereichen unterordnen und sind über die drei Hauptseiten Home, Gym und Stats aufrufbar. 
